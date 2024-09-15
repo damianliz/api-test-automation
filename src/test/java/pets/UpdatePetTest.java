@@ -1,10 +1,11 @@
-import com.petstore.api.config.TestBase;
+package pets;
+
 import com.petstore.api.models.pet.PetCategory;
 import com.petstore.api.models.pet.PetRequestBody;
 import com.petstore.api.models.pet.PetTags;
-import org.hamcrest.Matchers;
+import com.petstore.api.services.PetService;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.collections.Lists;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,12 +13,20 @@ import java.util.Random;
 
 import static org.hamcrest.Matchers.is;
 
-public class AddNewPetTests extends TestBase {
 
-    @Test
-    public void addNewPetTest_status_available_cat_1() {
-        int petId = new Random().nextInt(100);
-        String petName = "pet name-" + petId;
+public class UpdatePetTest {
+
+    private final String updatedPetName = "New Pet Name";
+    private int petId;
+    private String petName;
+    private PetService petService;
+    private PetRequestBody petRequestBody;
+
+    @BeforeClass
+    public void setup() {
+        petService = new PetService();
+        petId = new Random().nextInt(100);
+        petName = "pet name-" + petId;
 
         PetCategory category = PetCategory
                 .builder()
@@ -31,7 +40,7 @@ public class AddNewPetTests extends TestBase {
                 .name("small")
                 .build();
 
-        PetRequestBody requestBody = PetRequestBody
+        petRequestBody = PetRequestBody
                 .builder()
                 .id(petId)
                 .name(petName)
@@ -41,11 +50,22 @@ public class AddNewPetTests extends TestBase {
                 .status("available")
                 .build();
 
-        petService.addNewPet(requestBody)
+        petService.addNewPet(petRequestBody)
                 .then()
                 .statusCode(200)
                 .body("id", is(petId))
                 .body("name", is(petName))
                 .body("status", is("available"));
+    }
+
+    @Test
+    public void updatePet() {
+        petRequestBody.setName(updatedPetName);
+
+        petService.updateExistingPet(petRequestBody)
+                .then()
+                .statusCode(200)
+                .body("id", is(petId))
+                .body("name", is(updatedPetName));
     }
 }
